@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="UTF-8"> 
+    <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1"> 
+	<title>ExtraCredit Assignment</title>
+	<script src="http://d3js.org/d3.v4.min.js"></script>
+	<style type="text/css">
+		.dot {
+  stroke: #000;
+}
+
+	</style>
+</head>
+<body>
+	<h1>Error Data Represented for Ever Winner from 2004-2014</h1>
+<script>
+	
+////--------------------------Data Reading------------------------/////////
+
+ 
+  d3.csv("10yearAUSOpenMatches.csv", function(error,data,columns) {
+  console.log(data);
+ var winner_data=[];
+  var error1_data=[];
+  var year_data=[];
+  data.forEach(function(d) {
+  	if(d.round=="Final"){
+     winner_data.push(d.winner);
+     error1_data.push(d.error1);
+     year_data.push(d.year);
+  }
+  });
+console.log(winner_data);
+
+  	var max_error=[];
+  	var NestedDataone = d3.nest()
+  .key(function(d) { max_error.push(d.error1);return d.year;})
+  .sortKeys(d3.ascending)
+  .entries(data);
+
+ var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+
+    var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+ var winner=[];
+ var xmax=d3.max(year_data,function(d)
+ {
+ 	return+d;
+ });
+var xmin=d3.min(year_data,function(d)
+ {
+ 	return+d;
+ });
+
+ var x = d3.scaleLinear()
+    .domain([xmin, xmax])
+    .rangeRound([0, width]);
+
+ var ymax = d3.max(error1_data, function(d) {
+  return +d;
+});
+ var ymin=d3.min(error1_data,function(d)
+ {
+ 	return+d;
+ });
+
+var y = d3.scaleLinear()
+    	      .domain([ymin-10, ymax+10])
+    	      .range([ height, 0 ]);
+
+var xAxis = d3.axisBottom(x),
+    yAxis = d3.axisLeft(y);
+
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .append("text")
+      .attr("x", width)
+      .attr("y", -6)
+      .text("Year");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .text("Error Rate");
+
+var data = [];
+for(var i=0;i<error1_data.length;i++)
+{
+	var dataobjects = {}
+    dataobjects['year'] = year_data[i];
+    dataobjects['error1'] = error1_data[i];
+    dataobjects['winner']=winner_data[i];
+    data.push(dataobjects);
+}
+//console.log(data);
+//referred from : http://alignedleft.com/tutorials/d3/making-a-scatterplot////
+svg.selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+          .attr("cx", function (d) {return x(d["year"]); } )
+          .attr("cy", function (d) { return y(d["error1"]); } )
+          .attr("r", 8)
+          .style("fill","red")
+          .text(function(d,i){
+          	//sconsole.log(d["winner"]);
+          	return d["winner"];});
+//console.log(data[2]["winner"]);
+
+svg.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 7) + ")")
+      .style("text-anchor", "middle")
+      .style("fill","black")
+      .style("font-size","15px")
+      .text("year");
+
+ svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Error");      
+
+
+
+svg.selectAll("text")
+			   .data(data)
+			   .enter()
+			   .append("text")
+			   .text(function(d) {
+			   		console.log(d["winner"]);return ["winner"];
+			   })
+			   .attr("x", function(d) {
+			   		return x(d["year"]);
+			   })
+			   .attr("y", function(d) {
+			   		return y(d["error1"]);
+			   })
+			   .attr("font-family", "sans-serif")
+			   .attr("font-size", "11px")
+			   .attr("fill", "red");
+
+
+
+});
+</script>
+
+</body>
+</html>

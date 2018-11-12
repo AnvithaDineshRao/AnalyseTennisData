@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<style>
+.h1{
+  display: inline;
+
+}
+div{
+  position: absolute;
+  top: 140px;
+  left:575px;
+
+}
+div1{
+  position: absolute;
+  top: 140px;
+  left:125px;
+
+}
+div2{
+  position: absolute;
+  top: 140px;
+  left:980px;
+
+
+}
+div3{
+  position: absolute;
+  top: 180px;
+  left:500px;
+  font-size: 32px;
+ font-family: 'Oswald', sans-serif !important;
+ }
+ .chart .label {
+  fill: black;
+  text-anchor: end;
+  font: sans-serif;
+  font-size: 14px;
+}
+div4{
+  position: absolute;
+  top: 87px;
+  left:575px;
+  font-size:30px;
+}
+.chart .label {
+  fill: black;
+  text-anchor: end;
+  font: sans-serif;
+  font-size: 14px;
+}
+
+div5{
+  position: absolute;
+  top: 87px;
+  left:125px;
+  font-size:30px;
+}
+.chart .legend {
+  font: sans-serif;
+  fill: black;
+  font-size: 14px;
+  text-anchor: start;
+}
+div6{
+  position: absolute;
+  top: 87px;
+  left:1000px;
+  font-size:30px;
+}
+svg{
+  position: absolute;
+  top: 150px;
+  left:275px;
+}
+
+.chart text {
+  fill: white;
+  font:  sans-serif;
+  text-anchor: end;
+  font-size: 13px;
+}
+
+
+.bar:hover {
+  fill: green;
+}
+
+button {
+  position: absolute;
+  top: 20px;
+  left: 1200px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+img
+{
+  position: absolute;
+  top:60px;
+  left:-40px;
+}
+.image1
+{
+  position: absolute;
+  top:60px;
+  left:1050px;
+}
+
+</style>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Oswald:400,300,700' rel='stylesheet' type='text/css'>
+<script>
+d3.select('body').append("h1").style("color","black").style('font-family', 'CrimsonItalic');
+</script>
+<script>
+////--------------------------Data Reading------------------------/////////
+
+ 
+  d3.csv("10yearAUSOpenMatches.csv", function(error,data,columns) {
+    
+   ////////////////------creating headers for year,players-------------------////
+    d3.select("body").append('div4').style("color","black").style('font-family', 'CrimsonItalic').text("Year");
+    d3.select("body").append('div5').style("color","black").style('font-family', 'CrimsonItalic').text("Player1");
+     d3.select("body").append('div6').style("color","black").style('font-family', 'CrimsonItalic').text("Player2");
+
+
+    
+  var dataFilteredFirst;
+  var player_list=[];
+  var selected_player1;
+  var dataFilteredFirstplayer=[];
+  var dataFilteredFirstoneandtwo=[];
+  var graphdata=[];
+  
+  var NestedDataone = d3.nest()
+  .key(function(d) { return d.year;})
+  .sortKeys(d3.ascending)
+  .entries(data);
+   
+  d3.select('body').append('div').style("float","left")
+  .append('select')
+  .attr('class','select1')
+  .on('change',change)
+  .selectAll('option')
+  .data(NestedDataone)
+  .enter()
+  .append('option')
+  .attr('value',function (d) { return d.key })
+  .text(function (d) { return d.key });
+  d3.select(".select1").property('value', 'Select');
+ 
+  
+function change() {
+  
+  var value = this.value;
+  
+  dataFilteredFirst = NestedDataone.filter(function (d) { return d.key === value })
+
+  player_list=[];
+  for(var i=0;i<dataFilteredFirst[0].values.length;i++)
+  {  
+       player_list.push(dataFilteredFirst[0].values[i].player1);
+       
+  }
+
+  /*Referred from :  https://stackoverflow.com/questions/34901593/how-to-filter-an-array-from-all-elements-of-another-array*/
+  player_list = player_list.filter(function(player, i, array){ return array.indexOf(player) === i; });
+  
+  createplayerdropdown(player_list,dataFilteredFirst);
+  }
+  
+
+function createplayerdropdown(player_list,dataFilteredFirst)
+  {
+     
+     var dataFilteredFirstplayer;
+      
+    var NestedDataoneplayer = d3.nest()
+    .key(function(d) { return d.player1;});
+      
+       
+  
+  d3.select('body').append('div1').style("overflow","hidden")
+  .append('select')
+  .attr("class",'select2')
+  .on("change",changes)
+  .selectAll('option')
+  .data(player_list)
+  .enter()
+  .append('option')
+  .style("fontStyle","italic")
+  .attr('value',function (d) { return d.key })
+  .text(function (d) { return d });
+  d3.select(".select2").property('value', 'Select');
+
+  }
+
+function changes()
+{ 
+    selected_player1=this.value;
+    for(var i=0;i<dataFilteredFirst[0].values.length;i++){
+      if(dataFilteredFirst[0].values[i].player1==selected_player1)
+    {
+      dataFilteredFirstplayer.push(dataFilteredFirst[0].values[i].player2);
+    }
+  }
+
+createsecondplayerdropdown();
+}
+
+
+function createsecondplayerdropdown()
+{
+     var NestedDataonesecondplayer = d3.nest()
+      .key(function(d) { return d.player2;})
+       .entries(data);
+       
+  
+  d3.select('body').append('div2').style("overflow","hidden")
+  .append('select')
+  .attr('class','select3')
+  .on("change",changegraph)
+  .selectAll('option')
+  .data(dataFilteredFirstplayer)
+  .enter()
+  .append('option')
+  .attr('value',function (d) { return d.key })
+  .text(function (d) { return d });
+  d3.select(".select3").property('value', 'Select');
+   
+  }
+
+function changegraph()
+{ 
+
+  
+  for(var i=0;i<dataFilteredFirst[0].values.length;i++){
+      if(dataFilteredFirst[0].values[i].player1==selected_player1&&dataFilteredFirst[0].values[i].player2==this.value)
+    {
+      
+      dataFilteredFirstoneandtwo.push(dataFilteredFirst[0].values[i]);
+    }
+  }
+  
+var palyer1data=[dataFilteredFirstoneandtwo[0].fastServe1,dataFilteredFirstoneandtwo[0].avgFirstServe1,dataFilteredFirstoneandtwo[0].avgSecServe1,dataFilteredFirstoneandtwo[0].total1,dataFilteredFirstoneandtwo[0].winner1];
+var palyer2data=[dataFilteredFirstoneandtwo[0].fastServe2,dataFilteredFirstoneandtwo[0].avgFirstServe2,dataFilteredFirstoneandtwo[0].avgSecServe2,dataFilteredFirstoneandtwo[0].total2,dataFilteredFirstoneandtwo[0].winner2];
+var player_name=[dataFilteredFirstoneandtwo[0].player1,dataFilteredFirstoneandtwo[0].player2];
+var winner_both=dataFilteredFirstoneandtwo[0].winner;
+
+var data = {
+  labels: [
+    'fastServe/km', 'avgFirstServe/km', 'avgSecServe/km',
+    'total', 'winner'
+  ],
+  series: [
+    {
+      label: dataFilteredFirstoneandtwo[0].player1,
+      values: palyer1data
+    },
+    {
+      label: dataFilteredFirstoneandtwo[0].player2,
+      values: palyer2data
+    },]
+};
+////////referred from :http://bl.ocks.org/erikvullings/51cc5332439939f1f292.html ////////////
+var Width = 400,barHeight = 20,DistanceGroups = 10;
+var color = ["#3366FF","#993333"];
+var chartHeight = barHeight * 10+ DistanceGroups * 5;
+
+d3.select("body").append('div3').data(dataFilteredFirstoneandtwo).style("color","black").style('font-family', 'CrimsonItalic').style("fill","green").text(function(d){return "Winner is "+ dataFilteredFirstoneandtwo[0].winner;});
+var DistanceLabels = 150;
+
+var bindData = [];
+for (var i=0; i<5; i++) {
+  for (var j=0; j<2; j++) {
+    bindData.push(data.series[j].values[i]);
+  }
+}
+var DistanceLegend = 250;
+var max = d3.max(bindData, function(d) {
+  return +d;
+});
+var Height = barHeight * data.series.length;
+
+var x = d3.scaleLinear()
+    .domain([0, max])
+    .rangeRound([0, Width]);
+
+
+var y = d3.scaleLinear()
+    .rangeRound([chartHeight + DistanceGroups, 0]);
+
+var graphwidth=DistanceLabels + Width + DistanceLegend-40;
+
+var yAxis = d3.axisLeft(y)
+    .scale(y)
+    .tickFormat('--')
+    .tickSize(0);
+
+var chart = d3.select(".chart")
+    .attr("width", graphwidth)
+    .attr("height", chartHeight)
+    .attr("transform","translate(0,100)");
+
+var bar = chart.selectAll("g")
+    .data(bindData)
+    .enter().append("g")
+    .attr("transform", function(d, i) {
+      return "translate(" + DistanceLabels + "," + (i * barHeight + DistanceGroups * (0.8 + Math.floor(i/data.series.length))) + ")";
+      
+    });
+// Create rectangles 
+bar.append("rect")
+    .attr("fill", function(d,i) { return color[i % data.series.length]; })
+    .attr("class", "bar")
+    .attr("width", x)
+    .attr("height", barHeight-1);
+
+bar.append("text")
+    .attr("x", function(d) { return x(d) - 5; })
+    .attr("y", barHeight / 2)
+    .attr("fill", "red")
+    .attr("dy", ".35em")
+    .text(function(d) { return d; });
+
+
+bar.append("text")
+    .attr("class", "label")
+    .attr("x", function(d) { return -10; })
+    .attr("y", Height / 2)
+    .attr("dy", ".35em")
+    .text(function(d,i) {
+      if (i % data.series.length === 0)
+        return data.labels[Math.floor(i/data.series.length)];
+      else
+        return ""});
+
+chart.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + DistanceLabels + ", " + -DistanceGroups + ")")
+      .call(yAxis);
+
+var legendRectSize = 18,
+    legendSpacing  = 2;
+var calculatehor=DistanceLabels + Width + 40 - legendRectSize;
+var difflegends=legendRectSize - legendSpacing;
+var sumoflegends=legendRectSize + legendSpacing;
+/***Referred from : https://github.com/zeroviscosity/d3-js-step-by-step/blob/master/step-3-adding-a-legend.html                     ***///
+var legend = chart.selectAll('.legend')
+    .data(data.series)
+    .enter()
+    .append('g')
+    .attr('transform', function (d, i) {
+        var height = sumoflegends;
+        var offset = -DistanceGroups/2;
+        var horizontal = calculatehor;
+        var vertical = i * height - offset;
+        return 'translate(' + horizontal + ',' + vertical + ')';
+    });
+
+legend.append('rect')
+    .attr('width', legendRectSize)
+    .attr('height', legendRectSize)
+    .style('fill', function (d, i) { return color[i]; });
+
+legend.append('text')
+    .attr('class', 'legend')
+    .attr('x', sumoflegends)
+    .attr('y', difflegends)
+    .text(function (d) { return d.label; });
+
+d3.select("button")
+    .on("click", redraw);
+
+alert("You can zoom the graph by double clicking on the bars in the chart.\n You can also restore it back to its size by clicking reset button on the top right corner\n You need to refresh the page everytime you ");
+
+///Referred from :  https://bl.ocks.org/mbostock/db6b4335bf1662b413e7968910104f0f                      /////
+var zoom = d3.zoom()
+    .scaleExtent([1, 1.75])
+    .translateExtent([[-1700, -1300], [Width +0.1, Height + 1]])
+    .on("zoom", zoomed);
+
+
+chart.call(zoom);
+
+
+function zoomed() {
+  chart.attr("transform", d3.event.transform);
+  console.log(d3.event.transform);
+}
+
+
+function redraw() {
+    var scale =  Math.pow(d3.event.scale,.001);
+    var translateY =100;
+    var translateX = 25;
+    
+      chart.attr("transform", "translate(" + [translateX,translateY] + ")" );
+    }
+
+}
+
+});
+</script>
+
+<body>
+  <button style="float:right">Reset</button>
+  <img src="player1.png" width="200" height="100">
+  <img class="image1" src="player2.jpg" width="200" height="100">
+  <h1 align="center">Players Data Analysis</h1>
+  <svg class="chart" ></svg>
+      
+
+  
+  </body>
+</html>
